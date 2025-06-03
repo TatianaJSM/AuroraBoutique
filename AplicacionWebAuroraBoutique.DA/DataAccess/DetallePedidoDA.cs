@@ -1,31 +1,105 @@
-﻿// -------------- DetallePedidoDA.cs --------------
+﻿using Npgsql;
+using AplicacionWebAuroraBoutique.Modelo;
 using System;
 using System.Collections.Generic;
-using System.Data;
-using Npgsql;
-using AplicacionWebAuroraBoutique.Modelo;
 
-namespace AplicacionWebAuroraBoutique.DA.DataAccess;
-
-public class DetallePedidoDA
+namespace AplicacionWebAuroraBoutique.DA.DataAccess
 {
-    private readonly NpgsqlDataSource _ds = new NpgsqlDataSourceBuilder(DbConfig.ConnString).Build();
-
-    public void Insertar(DetallePedido d)
+    public class DetallePedidoDA
     {
-        const string sql = "CALL auroraschema.sp_insert_detalle_pedido(@p_pedido,@p_producto,@p_cant,@p_total)";
-        try
+        public void Insertar(DetallePedido detalle)
         {
-            using var cn = _ds.CreateConnection(); cn.Open();
-            using var cmd = new NpgsqlCommand(sql, cn);
+            const string sql = "CALL auroraschema.sp_insert_detalle_pedido(@p_pedido, @p_producto, @p_cant, @p_total)";
+            try
+            {
+                using var conn = PostgresConnectionFactory.Create();
+                conn.Open();
+                using var cmd = new NpgsqlCommand(sql, conn);
 
-            cmd.Parameters.Add("@p_pedido", NpgsqlTypes.NpgsqlDbType.Integer).Value = d.IdPedido;
-            cmd.Parameters.Add("@p_producto", NpgsqlTypes.NpgsqlDbType.Integer).Value = d.IdProducto;
-            cmd.Parameters.Add("@p_cant", NpgsqlTypes.NpgsqlDbType.Integer).Value = d.Cantidad;
-            cmd.Parameters.Add("@p_total", NpgsqlTypes.NpgsqlDbType.Numeric).Value = d.PrecioTotalIVA;
+                cmd.Parameters.AddWithValue("@p_pedido", detalle.IdPedido);
+                cmd.Parameters.AddWithValue("@p_producto", detalle.IdProducto);
+                cmd.Parameters.AddWithValue("@p_cant", detalle.Cantidad);
+                cmd.Parameters.AddWithValue("@p_total", detalle.PrecioTotalIVA);
 
-            cmd.ExecuteNonQuery();
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DetallePedidoDA.Insertar] {ex.Message}");
+            }
         }
-        catch (Exception ex) { Console.WriteLine($"[DetallePedidoDA.Insertar] {ex}"); }
+
+        public void Modificar(DetallePedido detalle)
+        {
+            const string sql = "CALL auroraschema.sp_update_detalle_pedido(@p_iddetalle, @p_pedido, @p_producto, @p_cant, @p_total)";
+            try
+            {
+                using var conn = PostgresConnectionFactory.Create();
+                conn.Open();
+                using var cmd = new NpgsqlCommand(sql, conn);
+
+                cmd.Parameters.AddWithValue("@p_iddetalle", detalle.IdDetalle);
+                cmd.Parameters.AddWithValue("@p_pedido", detalle.IdPedido);
+                cmd.Parameters.AddWithValue("@p_producto", detalle.IdProducto);
+                cmd.Parameters.AddWithValue("@p_cant", detalle.Cantidad);
+                cmd.Parameters.AddWithValue("@p_total", detalle.PrecioTotalIVA);
+
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DetallePedidoDA.Modificar] {ex.Message}");
+            }
+        }
+
+        public void Eliminar(int idDetalle)
+        {
+            const string sql = "CALL auroraschema.sp_delete_detalle_pedido(@p_iddetalle)";
+            try
+            {
+                using var conn = PostgresConnectionFactory.Create();
+                conn.Open();
+                using var cmd = new NpgsqlCommand(sql, conn);
+
+                cmd.Parameters.AddWithValue("@p_iddetalle", idDetalle);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DetallePedidoDA.Eliminar] {ex.Message}");
+            }
+        }
+
+        public IEnumerable<DetallePedido> Listar()
+        {
+            const string sql = "SELECT * FROM auroraschema.fn_listar_detalle_pedido()";
+            var lista = new List<DetallePedido>();
+
+            try
+            {
+                using var conn = PostgresConnectionFactory.Create();
+                conn.Open();
+                using var cmd = new NpgsqlCommand(sql, conn);
+                using var dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    lista.Add(new DetallePedido
+                    {
+                        IdDetalle = dr.GetInt32(0),
+                        IdPedido = dr.GetInt32(1),
+                        IdProducto = dr.GetInt32(2),
+                        Cantidad = dr.GetInt32(3),
+                        PrecioTotalIVA = dr.GetDecimal(4)
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DetallePedidoDA.Listar] {ex.Message}");
+            }
+
+            return lista;
+        }
     }
 }

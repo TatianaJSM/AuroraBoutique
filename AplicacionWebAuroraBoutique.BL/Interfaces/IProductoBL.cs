@@ -1,16 +1,13 @@
-﻿using System;
+﻿using AplicacionWebAuroraBoutique.Modelo;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AplicacionWebAuroraBoutique.BL.Interfaces
 {
     public interface IProductoBL
     {
-        void RegistrarProducto();
-        void ModificarProducto();
-        void EliminarProducto();
-        void ListarProductos();
+        void Insertar(Producto p);
+        void Modificar(Producto p);
+        void Eliminar(int idProducto);
+        IEnumerable<Producto> Listar();
     }
 }

@@ -1,16 +1,13 @@
-﻿using System;
+﻿using AplicacionWebAuroraBoutique.Modelo;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AplicacionWebAuroraBoutique.BL.Interfaces
 {
     public interface IClienteBL
     {
-        void RegistrarCliente();
-        void ModificarCliente();
-        void EliminarCliente();
-        void ListarClientes();
+        void Insertar(Cliente c);
+        void Modificar(Cliente c);
+        void Eliminar(int idCliente);
+        IEnumerable<Cliente> Listar();
     }
 }

@@ -1,37 +1,90 @@
-﻿// -------------- MetodoPagoDA.cs --------------
-using System;
-using System.Collections.Generic;
-using Npgsql;
+﻿using Npgsql;
 using AplicacionWebAuroraBoutique.Modelo;
+using System.Collections.Generic;
 
-namespace AplicacionWebAuroraBoutique.DA.DataAccess;
-
-public class MetodoPagoDA
+namespace AplicacionWebAuroraBoutique.DA.DataAccess
 {
-    private readonly NpgsqlDataSource _ds = new NpgsqlDataSourceBuilder(DbConfig.ConnString).Build();
-
-    public IEnumerable<MetodoPago> Listar()
+    public class MetodoPagoDA
     {
-        const string sql = "SELECT id_metodo_pago, pago FROM auroraschema.metodo_pago;";
-        var lista = new List<MetodoPago>();
-
-        try
+        public void Insertar(MetodoPago metodo)
         {
-            using var cn = _ds.CreateConnection(); cn.Open();
-            using var cmd = new NpgsqlCommand(sql, cn);
-            using var dr = cmd.ExecuteReader();
-
-            while (dr.Read())
+            const string sql = "CALL auroraschema.sp_insert_metodo_pago(@p_pago)";
+            try
             {
-                lista.Add(new MetodoPago
-                {
-                    IdMetodoPago = dr.GetInt32(0),
-                    Pago = dr.GetString(1)
-                });
+                using var conn = PostgresConnectionFactory.Create();
+                conn.Open();
+                using var cmd = new NpgsqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@p_pago", metodo.Pago);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[MetodoPagoDA.Insertar] {ex.Message}");
             }
         }
-        catch (Exception ex) { Console.WriteLine($"[MetodoPagoDA.Listar] {ex}"); }
 
-        return lista;
+        public void Modificar(MetodoPago metodo)
+        {
+            const string sql = "CALL auroraschema.sp_update_metodo_pago(@p_id, @p_pago)";
+            try
+            {
+                using var conn = PostgresConnectionFactory.Create();
+                conn.Open();
+                using var cmd = new NpgsqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@p_id", metodo.IdMetodoPago);
+                cmd.Parameters.AddWithValue("@p_pago", metodo.Pago);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[MetodoPagoDA.Modificar] {ex.Message}");
+            }
+        }
+
+        public void Eliminar(int idMetodoPago)
+        {
+            const string sql = "CALL auroraschema.sp_delete_metodo_pago(@p_id)";
+            try
+            {
+                using var conn = PostgresConnectionFactory.Create();
+                conn.Open();
+                using var cmd = new NpgsqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@p_id", idMetodoPago);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[MetodoPagoDA.Eliminar] {ex.Message}");
+            }
+        }
+
+        public IEnumerable<MetodoPago> Listar()
+        {
+            const string sql = "SELECT * FROM auroraschema.fn_listar_metodo_pago()";
+            var lista = new List<MetodoPago>();
+
+            try
+            {
+                using var conn = PostgresConnectionFactory.Create();
+                conn.Open();
+                using var cmd = new NpgsqlCommand(sql, conn);
+                using var dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    lista.Add(new MetodoPago
+                    {
+                        IdMetodoPago = dr.GetInt32(0),
+                        Pago = dr.GetString(1)
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[MetodoPagoDA.Listar] {ex.Message}");
+            }
+
+            return lista;
+        }
     }
 }

@@ -1,36 +1,90 @@
 ﻿using Npgsql;
 using AplicacionWebAuroraBoutique.Modelo;
+using System.Collections.Generic;
 
-namespace AplicacionWebAuroraBoutique.DA.DataAccess;
-
-public class CategoriaDA
+namespace AplicacionWebAuroraBoutique.DA.DataAccess
 {
-    public IEnumerable<Categoria> Listar()
+    public class CategoriaDA
     {
-        const string sql = "SELECT id_categoria, nombre FROM auroraschema.categoria";
-        var lista = new List<Categoria>();
-
-        try
+        public void Insertar(Categoria categoria)
         {
-            using var conn = PostgresConnectionFactory.Create();
-            conn.Open();
-            using var cmd = new NpgsqlCommand(sql, conn);
-            using var dr = cmd.ExecuteReader();
-
-            while (dr.Read())
+            const string sql = "CALL auroraschema.sp_insert_categoria(@p_nombre)";
+            try
             {
-                lista.Add(new Categoria
-                {
-                    IdCategoria = dr.GetInt32(0),
-                    Nombre = dr.GetString(1)
-                });
+                using var conn = PostgresConnectionFactory.Create();
+                conn.Open();
+                using var cmd = new NpgsqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@p_nombre", categoria.Nombre);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[CategoriaDA.Insertar] {ex.Message}");
             }
         }
-        catch (Exception ex)
+
+        public void Modificar(Categoria categoria)
         {
-            Console.WriteLine($"[CategoriaDA.Listar] {ex.Message}");
+            const string sql = "CALL auroraschema.sp_update_categoria(@p_categoria, @p_nombre)";
+            try
+            {
+                using var conn = PostgresConnectionFactory.Create();
+                conn.Open();
+                using var cmd = new NpgsqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@p_categoria", categoria.IdCategoria);
+                cmd.Parameters.AddWithValue("@p_nombre", categoria.Nombre);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[CategoriaDA.Modificar] {ex.Message}");
+            }
         }
 
-        return lista;
+        public void Eliminar(int idCategoria)
+        {
+            const string sql = "CALL auroraschema.sp_delete_categoria(@p_categoria)";
+            try
+            {
+                using var conn = PostgresConnectionFactory.Create();
+                conn.Open();
+                using var cmd = new NpgsqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@p_categoria", idCategoria);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[CategoriaDA.Eliminar] {ex.Message}");
+            }
+        }
+
+        public IEnumerable<Categoria> Listar()
+        {
+            const string sql = "SELECT * FROM auroraschema.fn_listar_categorias()";
+            var lista = new List<Categoria>();
+
+            try
+            {
+                using var conn = PostgresConnectionFactory.Create();
+                conn.Open();
+                using var cmd = new NpgsqlCommand(sql, conn);
+                using var dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    lista.Add(new Categoria
+                    {
+                        IdCategoria = dr.GetInt32(0),
+                        Nombre = dr.GetString(1)
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[CategoriaDA.Listar] {ex.Message}");
+            }
+
+            return lista;
+        }
     }
 }

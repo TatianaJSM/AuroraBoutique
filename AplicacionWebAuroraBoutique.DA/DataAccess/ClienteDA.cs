@@ -1,65 +1,103 @@
 ﻿using Npgsql;
 using AplicacionWebAuroraBoutique.Modelo;
+using System.Collections.Generic;
 
-namespace AplicacionWebAuroraBoutique.DA.DataAccess;
-
-public class ClienteDA
+namespace AplicacionWebAuroraBoutique.DA.DataAccess
 {
-    /// <summary>Inserta un cliente por medio del SP auroraschema.sp_insert_cliente</summary>
-    public void Insertar(Cliente c)
+    public class ClienteDA
     {
-        const string sql = "CALL auroraschema.sp_insert_cliente(@p_nombre,@p_ap1,@p_ap2)";
-        try
+        public void Insertar(Cliente c)
         {
-            using var conn = PostgresConnectionFactory.Create();
-            conn.Open();
-
-            using var cmd = new NpgsqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("@p_nombre", c.Nombre);
-            cmd.Parameters.AddWithValue("@p_ap1", c.PrimerApellido);
-            cmd.Parameters.AddWithValue("@p_ap2", c.SegundoApellido);
-
-            cmd.ExecuteNonQuery();
-        }
-        catch (Exception ex)
-        {
-            // TEMPORAL: solo logueamos para no romper flujo si la BD está apagada
-            Console.WriteLine($"[ClienteDA.Insertar] {ex.Message}");
-        }
-    }
-
-    /// <summary>Devuelve todos los clientes (simulado si la BD no responde).</summary>
-    public IEnumerable<Cliente> Listar()
-    {
-        const string sql = "SELECT id_cliente,nombre,primer_apellido,segundo_apellido FROM auroraschema.cliente";
-        var lista = new List<Cliente>();
-
-        try
-        {
-            using var conn = PostgresConnectionFactory.Create();
-            conn.Open();
-
-            using var cmd = new NpgsqlCommand(sql, conn);
-            using var dr = cmd.ExecuteReader();
-
-            while (dr.Read())
+            const string sql = "CALL auroraschema.sp_insert_cliente(@p_nombre,@p_ap1,@p_ap2)";
+            try
             {
-                lista.Add(new Cliente
-                {
-                    IdCliente = dr.GetInt32(0),
-                    Nombre = dr.GetString(1),
-                    PrimerApellido = dr.GetString(2),
-                    SegundoApellido = dr.GetString(3)
-                });
+                using var conn = PostgresConnectionFactory.Create();
+                conn.Open();
+
+                using var cmd = new NpgsqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@p_nombre", c.Nombre);
+                cmd.Parameters.AddWithValue("@p_ap1", c.PrimerApellido);
+                cmd.Parameters.AddWithValue("@p_ap2", c.SegundoApellido);
+
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ClienteDA.Insertar] {ex.Message}");
             }
         }
-        catch (Exception ex)
+
+        public void Modificar(Cliente c)
         {
-            Console.WriteLine($"[ClienteDA.Listar] {ex.Message}");
-            // Si la BD está caída, devolvemos un mock para que la UI no falle
-            lista.Add(new Cliente { IdCliente = 0, Nombre = "Demo", PrimerApellido = "Offline", SegundoApellido = "Mode" });
+            const string sql = "CALL auroraschema.sp_update_cliente(@p_id, @p_nombre, @p_ap1, @p_ap2)";
+            try
+            {
+                using var conn = PostgresConnectionFactory.Create();
+                conn.Open();
+
+                using var cmd = new NpgsqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@p_id", c.IdCliente);
+                cmd.Parameters.AddWithValue("@p_nombre", c.Nombre);
+                cmd.Parameters.AddWithValue("@p_ap1", c.PrimerApellido);
+                cmd.Parameters.AddWithValue("@p_ap2", c.SegundoApellido);
+
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ClienteDA.Modificar] {ex.Message}");
+            }
         }
 
-        return lista;
+        public void Eliminar(int idCliente)
+        {
+            const string sql = "CALL auroraschema.sp_delete_cliente(@p_id)";
+            try
+            {
+                using var conn = PostgresConnectionFactory.Create();
+                conn.Open();
+
+                using var cmd = new NpgsqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@p_id", idCliente);
+
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ClienteDA.Eliminar] {ex.Message}");
+            }
+        }
+
+        public IEnumerable<Cliente> Listar()
+        {
+            const string sql = "SELECT * FROM auroraschema.fn_listar_clientes()";
+            var lista = new List<Cliente>();
+
+            try
+            {
+                using var conn = PostgresConnectionFactory.Create();
+                conn.Open();
+
+                using var cmd = new NpgsqlCommand(sql, conn);
+                using var dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    lista.Add(new Cliente
+                    {
+                        IdCliente = dr.GetInt32(0),
+                        Nombre = dr.GetString(1),
+                        PrimerApellido = dr.GetString(2),
+                        SegundoApellido = dr.GetString(3)
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ClienteDA.Listar] {ex.Message}");
+            }
+
+            return lista;
+        }
     }
 }
