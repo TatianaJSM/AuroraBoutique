@@ -6,4 +6,16 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Include="DataAccess\LoginPersonalEnvioDA.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="9.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AplicacionWebAuroraBoutique.Modelo\AplicacionWebAuroraBoutique.Modelo.csproj" />
+  </ItemGroup>
+
 </Project>
