@@ -101,7 +101,7 @@ namespace AplicacionWebAuroraBoutique.DA.DataAccess
 
         public int? Autenticar(string usuario, string contrasena)
         {
-            const string sql = "SELECT id_personal_envio FROM auroraschema.login_personalenvio WHERE usuario = @u AND contrasena = @p";
+            const string sql = "SELECT auroraschema.fn_autenticar_login_personalenvio(@u, @p)";
             try
             {
                 using var conn = PostgresConnectionFactory.Create();

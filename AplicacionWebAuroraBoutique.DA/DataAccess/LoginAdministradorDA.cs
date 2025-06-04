@@ -101,7 +101,7 @@ namespace AplicacionWebAuroraBoutique.DA.DataAccess
 
         public int? Autenticar(string usuario, string contrasena)
         {
-            const string sql = "SELECT id_administrador FROM auroraschema.login_administrador WHERE usuario = @u AND contrasena = @p";
+            const string sql = "SELECT auroraschema.fn_autenticar_login_administrador(@u, @p)";
             try
             {
                 using var conn = PostgresConnectionFactory.Create();
@@ -122,4 +122,3 @@ namespace AplicacionWebAuroraBoutique.DA.DataAccess
         }
     }
 }
-

@@ -99,17 +99,18 @@ namespace AplicacionWebAuroraBoutique.DA.DataAccess
             return lista;
         }
 
+       
         public int? Autenticar(string usuario, string contrasena)
         {
-            const string sql = "SELECT id_cliente FROM auroraschema.login_cliente WHERE usuario = @u AND contrasena = @p";
+            const string sql = "SELECT * FROM auroraschema.fn_autenticar_login_cliente(@p_usuario, @p_contrasena)";
             try
             {
                 using var conn = PostgresConnectionFactory.Create();
                 conn.Open();
 
                 using var cmd = new NpgsqlCommand(sql, conn);
-                cmd.Parameters.AddWithValue("@u", usuario);
-                cmd.Parameters.AddWithValue("@p", contrasena);
+                cmd.Parameters.AddWithValue("@p_usuario", usuario);
+                cmd.Parameters.AddWithValue("@p_contrasena", contrasena);
 
                 var result = cmd.ExecuteScalar();
                 return result is int id ? id : (int?)null;
