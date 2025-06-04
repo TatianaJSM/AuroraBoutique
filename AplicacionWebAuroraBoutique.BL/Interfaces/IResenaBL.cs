@@ -8,6 +8,7 @@ namespace AplicacionWebAuroraBoutique.BL.Interfaces
         void Insertar(Resena r);
         void Modificar(Resena r);
         void Eliminar(int idResena);
-        IEnumerable<Resena> ListarPorProducto(int idProducto);
+        IEnumerable<Resena> Listar();           
+        IEnumerable<Resena> ListarPorProducto(int idProducto);  
     }
 }
