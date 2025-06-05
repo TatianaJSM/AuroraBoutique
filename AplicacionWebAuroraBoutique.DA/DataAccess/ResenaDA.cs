@@ -106,5 +106,41 @@ namespace AplicacionWebAuroraBoutique.DA.DataAccess
             }
             return lista;
         }
+
+
+
+        public IEnumerable<Resena> Listar()
+        {
+            const string sql = "SELECT * FROM auroraschema.fn_listar_resena()";  // Asumiendo que existe este SP general (si no, lo creamos luego)
+            var lista = new List<Resena>();
+
+            try
+            {
+                using var conn = PostgresConnectionFactory.Create();
+                conn.Open();
+                using var cmd = new NpgsqlCommand(sql, conn);
+                using var dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    lista.Add(new Resena
+                    {
+                        IdResena = dr.GetInt32(0),
+                        IdCliente = dr.GetInt32(1),
+                        Calificacion = dr.GetInt32(2),
+                        Comentario = dr.GetString(3),
+                        IdPedido = dr.GetInt32(4),
+                        IdTipoFecha = dr.GetInt32(5),
+                        IdProducto = dr.GetInt32(6)
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ResenaDA.Listar] {ex.Message}");
+            }
+            return lista;
+        }
+
     }
 }

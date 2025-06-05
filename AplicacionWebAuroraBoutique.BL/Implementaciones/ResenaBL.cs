@@ -7,11 +7,31 @@ namespace AplicacionWebAuroraBoutique.BL.Implementaciones
 {
     public class ResenaBL : IResenaBL
     {
-        private readonly ResenaDA _da = new();
+        private readonly ResenaDA _resenaDA = new();
 
-        public void Insertar(Resena r) => _da.Insertar(r);
-        public void Modificar(Resena r) => _da.Modificar(r);
-        public void Eliminar(int idResena) => _da.Eliminar(idResena);
-        public IEnumerable<Resena> ListarPorProducto(int idProducto) => _da.ListarPorProducto(idProducto);
+        public void Insertar(Resena r)
+        {
+            _resenaDA.Insertar(r);
+        }
+
+        public void Modificar(Resena r)
+        {
+            _resenaDA.Modificar(r);
+        }
+
+        public void Eliminar(int idResena)
+        {
+            _resenaDA.Eliminar(idResena);
+        }
+
+        public IEnumerable<Resena> Listar()
+        {
+            return _resenaDA.Listar();
+        }
+
+        public IEnumerable<Resena> ListarPorProducto(int idProducto)
+        {
+            return _resenaDA.ListarPorProducto(idProducto);
+        }
     }
 }
