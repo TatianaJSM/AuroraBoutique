@@ -10,10 +10,4 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\AplicacionWebAuroraBoutique.BL\AplicacionWebAuroraBoutique.BL.csproj" />
-    <ProjectReference Include="..\AplicacionWebAuroraBoutique.DA\AplicacionWebAuroraBoutique.DA.csproj" />
-    <ProjectReference Include="..\AplicacionWebAuroraBoutique.Modelo\AplicacionWebAuroraBoutique.Modelo.csproj" />
-  </ItemGroup>
-
 </Project>
